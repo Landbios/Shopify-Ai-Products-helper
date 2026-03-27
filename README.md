@@ -28,9 +28,13 @@ A Shopify embedded app that powers AI-driven product recommendations and upsell 
 ## Features
 
 - **Embedded App** — runs fully inside the Shopify Admin via App Bridge.
+- **Admin Dashboard** — summary cards showing total and active upsell rules.
+- **Upsell Rule CRUD** — create, view, edit, and delete rules via Polaris UI with ResourcePicker.
 - **Admin GraphQL Integration** — create and update products, variants, metafields, and metaobjects.
 - **Session Storage** — Prisma-backed session storage for OAuth token persistence.
 - **Webhook Handling** — handles `app/uninstalled` and `app/scopes_update` lifecycle webhooks.
+- **Recommendations API** — public JSON endpoint (`/apps/smartupsell/api/recommendations`) for the storefront widget.
+- **Theme App Extension** — a Liquid block merchants can add to any page via the Theme Editor without touching code.
 - **Custom Metafields & Metaobjects** — extensible custom data layer for recommendation metadata.
 
 ---
@@ -114,21 +118,28 @@ The Shopify CLI will:
 shopify-Ai-products-recomendation/
 ├── app/
 │   ├── routes/
-│   │   ├── app._index.tsx          # Main app dashboard
-│   │   ├── app.additional.tsx      # Secondary page example
-│   │   ├── app.tsx                 # App shell layout
-│   │   ├── auth.$.tsx              # OAuth callback handler
+│   │   ├── app._index.tsx              # Dashboard with summary cards
+│   │   ├── app.rules._index.tsx        # Upsell rules list page
+│   │   ├── app.rules.new.tsx           # Create new rule (with ResourcePicker)
+│   │   ├── app.rules.$id.tsx           # Edit / delete a rule
+│   │   ├── app.tsx                     # App shell layout + Nav menu
+│   │   ├── api.recommendations.tsx     # Public JSON API for storefront widget
+│   │   ├── auth.$.tsx                  # OAuth callback handler
 │   │   ├── webhooks.app.uninstalled.tsx
 │   │   └── webhooks.app.scopes_update.tsx
-│   ├── shopify.server.ts           # Shopify app configuration
-│   └── db.server.ts                # Prisma client singleton
+│   ├── shopify.server.ts               # Shopify app configuration
+│   └── db.server.ts                    # Prisma client singleton
+├── extensions/
+│   └── upsell-widget/                  # Theme App Extension
+│       ├── shopify.extension.toml
+│       └── blocks/
+│           └── upsell-widget.liquid    # Storefront widget block
 ├── prisma/
-│   ├── schema.prisma               # Database schema
-│   └── migrations/                 # Database migrations
-├── extensions/                     # Shopify app extensions (UI, theme, etc.)
-├── public/                         # Static assets
-├── shopify.app.toml                # App configuration for Shopify CLI
-├── vite.config.ts                  # Vite build configuration
+│   ├── schema.prisma                   # Session + UpsellRule models
+│   └── migrations/
+├── public/                             # Static assets
+├── shopify.app.toml                    # App + App Proxy configuration
+├── vite.config.ts
 └── package.json
 ```
 
