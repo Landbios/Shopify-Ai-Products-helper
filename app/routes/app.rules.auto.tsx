@@ -3,7 +3,7 @@ import type {
   LoaderFunctionArgs,
   HeadersFunction,
 } from "react-router";
-import { useSubmit, useActionData, useNavigation, Form } from "react-router";
+import { useActionData, useNavigation, Form } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { generateUpsellRules } from "../services/ai.server";
@@ -46,8 +46,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     try {
       const aiRules = await generateUpsellRules(products);
       return { rules: aiRules, error: null };
-    } catch (err: any) {
-      return { rules: null, error: err.message };
+    } catch (err: unknown) {
+      return { rules: null, error: err instanceof Error ? err.message : String(err) };
     }
   }
 
@@ -56,7 +56,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const rules = JSON.parse(rulesJson);
     
     // Map to UpsellRuleInput
-    const dbRules = rules.map((r: any) => ({
+    const dbRules = rules.map((r: Record<string, string>) => ({
       shop: session.shop,
       title: `AI generated: ${r.triggerProductTitle} → ${r.recommendedProductTitle}`,
       triggerProductId: r.triggerProductId,
@@ -75,7 +75,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function AutoGenerateRules() {
-  const actionData = useActionData<any>();
+  const actionData = useActionData<{
+    rules?: Record<string, string>[] | null;
+    error?: string | null;
+    success?: boolean | null;
+  }>();
   const navigation = useNavigation();
 
   const isGenerating = navigation.state === "submitting" && navigation.formData?.get("intent") === "generate";
@@ -111,7 +115,7 @@ export default function AutoGenerateRules() {
         {generatedRules && generatedRules.length > 0 && !success && (
           <s-section heading="Suggested Rules">
             <s-stack direction="block" gap="base">
-              {generatedRules.map((rule: any, i: number) => (
+              {generatedRules.map((rule: Record<string, string>, i: number) => (
                 <s-box padding="base" border="base" borderRadius="base" key={i}>
                   <s-stack direction="inline" gap="small">
                     {rule.recommendedProductImage && (

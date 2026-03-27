@@ -1,6 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 
-export async function generateUpsellRules(products: any[]) {
+export interface AIProductInput {
+  id: string;
+  title: string;
+  featuredImage?: { url: string } | null;
+}
+
+export async function generateUpsellRules(products: AIProductInput[]) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured in your environment variables.");
@@ -53,8 +59,8 @@ ${JSON.stringify(
     }
 
     return JSON.parse(response.text);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Gemini AI Error:", err);
-    throw new Error("Failed to generate AI recommendations: " + err.message);
+    throw new Error("Failed to generate AI recommendations: " + (err instanceof Error ? err.message : String(err)));
   }
 }
