@@ -1,104 +1,278 @@
 {%- comment -%}
-  SmartUpsell Widget Block
-  Fetches a product recommendation from the SmartUpsell Engine API
-  and renders an upsell card on the product or cart page.
-  Merchants can add/remove this block from the Theme Editor.
+  SmartUpsell Bundle Widget
+  Renders a "Frequently Bought Together" style upsell bundle on product pages.
 {%- endcomment -%}
 
 {% if block.settings.show_widget %}
 <div
-  id="smartupsell-widget"
+  id="sue-widget-container"
   data-product-id="{{ product.id }}"
   data-shop="{{ shop.permanent_domain }}"
   style="display: none;"
 >
-  <!-- Populated by JavaScript below -->
+  <div class="sue-container">
+    <h2 class="sue-heading">{{ block.settings.label_text | default: "Frequently Bought Together" }}</h2>
+    
+    <div class="sue-bundle-layout">
+      
+      <!-- Trigger Product -->
+      <div class="sue-card">
+        <div class="sue-img-wrap">
+          <label class="sue-checkbox-label">
+            <input type="checkbox" class="sue-checkbox" id="sue-trigger-check" checked disabled>
+            <span class="sue-custom-checkbox"></span>
+          </label>
+          <img class="sue-img" id="sue-trigger-img" alt="Main Item" />
+        </div>
+        <div class="sue-info">
+          <div class="sue-title"><strong>This item:</strong> <span id="sue-trigger-title"></span></div>
+          <div class="sue-price" id="sue-trigger-price"></div>
+        </div>
+      </div>
+      
+      <div class="sue-plus-sign">+</div>
+      
+      <!-- Recommended Product -->
+      <div class="sue-card">
+        <div class="sue-img-wrap">
+          <label class="sue-checkbox-label" style="cursor: pointer;">
+            <input type="checkbox" class="sue-checkbox" id="sue-rec-check" checked>
+            <span class="sue-custom-checkbox"></span>
+          </label>
+          <img class="sue-img" id="sue-rec-img" alt="Recommended Item" />
+        </div>
+        <div class="sue-info">
+          <div class="sue-title" id="sue-rec-title"></div>
+          <div class="sue-price" id="sue-rec-price"></div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <div class="sue-footer">
+      <div class="sue-total-wrap">
+        <span class="sue-total-label">Total:</span>
+        <span class="sue-total-price" id="sue-total-price"></span>
+      </div>
+      <button class="sue-buy-btn" id="sue-buy-btn">
+        {{ block.settings.button_text | default: "Buy this bundle now" }}
+      </button>
+    </div>
+  </div>
 </div>
 
 <style>
-  #smartupsell-widget {
-    margin: 1.5rem 0;
-    padding: 1rem 1.25rem;
-    border: 1px solid #e1e3e5;
-    border-radius: 8px;
-    background: #f6f6f7;
+  /* Base Reset & Layout */
+  #sue-widget-container {
+    margin: 2.5rem 0;
     font-family: inherit;
+    color: #111;
   }
-
-  #smartupsell-widget .sue-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #6d7175;
-    margin-bottom: 0.5rem;
+  
+  .sue-container {
+    background: transparent;
   }
-
-  .sue-content-row {
+  
+  .sue-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #111;
+    letter-spacing: -0.02em;
+  }
+  
+  .sue-bundle-layout {
     display: flex;
-    gap: 1rem;
     align-items: center;
-    margin-bottom: 0.75rem;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
   }
-
-  .sue-image {
-    width: 72px;
-    height: 72px;
-    object-fit: cover;
-    border-radius: 8px;
-    flex-shrink: 0;
-    border: 1px solid #e1e3e5;
-  }
-
-  .sue-details {
+  
+  .sue-card {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    width: 140px;
+    flex: 1 1 auto;
+    max-width: 200px;
+  }
+  
+  .sue-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    background: #f9f9f9;
+    padding: 1.25rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.85rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  
+  .sue-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  /* Modern Checkbox */
+  .sue-checkbox-label {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    z-index: 2;
+  }
+  .sue-checkbox {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+  .sue-custom-checkbox {
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  .sue-checkbox:checked + .sue-custom-checkbox {
+    background-color: #000;
+    border-color: #000;
+  }
+  .sue-checkbox:checked + .sue-custom-checkbox::after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .sue-checkbox:disabled + .sue-custom-checkbox {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
-  #smartupsell-widget .sue-product-title {
+  .sue-info {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  
+  .sue-title {
+    color: #333;
+    margin-bottom: 0.4rem;
+    min-height: 2.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .sue-price {
+    font-weight: 700;
+    color: #111;
+  }
+  
+  .sue-plus-sign {
+    font-size: 1.5rem;
+    color: #666;
+    margin-bottom: 3.5rem;
+    font-weight: 300;
+  }
+  
+  .sue-footer {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .sue-total-wrap {
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .sue-total-label {
+    font-weight: 600;
+    color: #111;
+    margin-right: 0.5rem;
+  }
+  
+  .sue-total-price {
+    font-weight: 800;
+    color: #111;
+    font-size: 1.25rem;
+  }
+  
+  .sue-buy-btn {
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.85rem 2rem;
     font-size: 1rem;
     font-weight: 600;
-    color: #202223;
-  }
-
-  #smartupsell-widget .sue-add-btn {
-    display: inline-block;
-    padding: 0.5rem 1.25rem;
-    background-color: #008060;
-    color: #fff;
-    font-size: 0.875rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    align-self: flex-start;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-
-  #smartupsell-widget .sue-add-btn:hover {
-    background-color: #006e52;
+  
+  .sue-buy-btn:hover:not(:disabled) {
+    background: #222;
   }
-
-  #smartupsell-widget .sue-add-btn:disabled {
-    opacity: 0.6;
+  
+  .sue-buy-btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  
+  .sue-buy-btn:disabled {
+    opacity: 0.7;
     cursor: not-allowed;
   }
 </style>
 
 <script>
   (function () {
-    var widget = document.getElementById('smartupsell-widget');
-    if (!widget) return;
+    var container = document.getElementById('sue-widget-container');
+    if (!container) return;
 
-    var productId = widget.dataset.productId;
-    var shop = widget.dataset.shop;
+    var productId = container.dataset.productId;
+    var shop = container.dataset.shop;
+    var moneySymbol = "{{ cart.currency.symbol | default: '$' }}";
 
     if (!productId || !shop) return;
 
-    // Encode the GID format expected by the API
     var gid = 'gid://shopify/Product/' + productId;
     var apiUrl = '/apps/smartupsell/api/recommendations?productId=' + encodeURIComponent(gid) + '&shop=' + encodeURIComponent(shop);
+
+    var recVariantId = null;
+    var triggerPrice = 0;
+    var recPrice = 0;
+
+    function formatMoney(amount) {
+      return moneySymbol + amount.toFixed(2);
+    }
+
+    function updatePriceUI() {
+      var recCheck = document.getElementById('sue-rec-check');
+      var total = triggerPrice;
+      if (recCheck && recCheck.checked) {
+        total += recPrice;
+      }
+      document.getElementById('sue-total-price').textContent = formatMoney(total);
+    }
 
     fetch(apiUrl)
       .then(function (res) { return res.json(); })
@@ -106,51 +280,94 @@
         if (!data.recommendation) return;
 
         var rec = data.recommendation;
+        var trig = data.triggerProduct || {};
 
-        var imgHtml = rec.productImage 
-          ? '<img class="sue-image" src="' + rec.productImage + '" alt="' + rec.productTitle + '">' 
-          : '';
+        // Parse prices
+        triggerPrice = parseFloat(trig.price || 0);
+        recPrice = parseFloat(rec.productPrice || 0);
 
-        widget.innerHTML =
-          '<p class="sue-label">{{ block.settings.label_text | default: "Frequently bought together" }}</p>' +
-          '<div class="sue-content-row">' +
-            imgHtml +
-            '<div class="sue-details">' +
-              '<p class="sue-product-title">' + rec.productTitle + '</p>' +
-              '<button class="sue-add-btn" data-variant-id="' + rec.productId + '">' +
-              '{{ block.settings.button_text | default: "Add to cart" }}</button>' +
-            '</div>' +
-          '</div>';
+        // Store variant numeric ID
+        recVariantId = rec.productVariantId ? rec.productVariantId.split('/').pop() : null;
 
-        widget.style.display = 'block';
+        // Trigger Product (Current Product)
+        if (trig.image) {
+          document.getElementById('sue-trigger-img').src = trig.image;
+        } else {
+          // Fallback to liquid object if API misses image
+          document.getElementById('sue-trigger-img').src = "{{ product.featured_image | img_url: '400x' }}";
+        }
+        document.getElementById('sue-trigger-title').textContent = trig.title || "{{ product.title | escape }}";
+        
+        // If API fails to return Trigger price, use liquid price
+        if (triggerPrice === 0) {
+          triggerPrice = {{ product.price | divided_by: 100.0 }};
+        }
+        document.getElementById('sue-trigger-price').textContent = formatMoney(triggerPrice);
 
-        // Add-to-cart handler
-        widget.querySelector('.sue-add-btn').addEventListener('click', function () {
+        // Recommended Product
+        if (rec.productImage) document.getElementById('sue-rec-img').src = rec.productImage;
+        document.getElementById('sue-rec-title').textContent = rec.productTitle;
+        document.getElementById('sue-rec-price').textContent = formatMoney(recPrice);
+
+        // Setup Checkbox toggle dynamically
+        document.getElementById('sue-rec-check').addEventListener('change', updatePriceUI);
+
+        updatePriceUI();
+        container.style.display = 'block';
+
+        // Add both to cart
+        document.getElementById('sue-buy-btn').addEventListener('click', function () {
           var btn = this;
-          btn.disabled = true;
-          btn.textContent = 'Adding…';
+          
+          // Capture current form variant specifically selected by the visitor
+          var variantInput = document.querySelector('form[action*="/cart/add"] [name="id"]');
+          var finalTriggerVariantId = variantInput ? variantInput.value : "{{ product.selected_or_first_available_variant.id }}";
 
-          // Extract numeric ID from GID
-          var numericId = rec.productId.split('/').pop();
+          var payload = { items: [] };
+
+          if (finalTriggerVariantId) {
+            payload.items.push({ id: finalTriggerVariantId, quantity: 1 });
+          }
+
+          var recCheck = document.getElementById('sue-rec-check');
+          if (recCheck && recCheck.checked && recVariantId) {
+            payload.items.push({ id: recVariantId, quantity: 1 });
+          }
+
+          if (payload.items.length === 0) return;
+
+          btn.disabled = true;
+          btn.textContent = 'Adding...';
 
           fetch('/cart/add.js', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: numericId, quantity: 1 })
+            body: JSON.stringify(payload)
           })
-            .then(function () {
-              btn.textContent = '✓ Added!';
-              // Trigger a cart refresh if the theme supports it
-              document.dispatchEvent(new CustomEvent('cart:updated'));
-            })
-            .catch(function () {
+          .then(function () {
+            btn.textContent = '✓ Added!';
+            
+            setTimeout(function() {
+              btn.textContent = '{{ block.settings.button_text | default: "Buy this bundle now" }}';
               btn.disabled = false;
-              btn.textContent = '{{ block.settings.button_text | default: "Add to cart" }}';
-            });
+            }, 2000);
+
+            // Emit typical Shopify theme cart update events
+            document.dispatchEvent(new CustomEvent('cart:updated'));
+            document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
+          })
+          .catch(function () {
+            btn.textContent = 'Error';
+            setTimeout(function() {
+              btn.textContent = '{{ block.settings.button_text | default: "Buy this bundle now" }}';
+              btn.disabled = false;
+            }, 2000);
+          });
         });
+
       })
       .catch(function (err) {
-        console.warn('[SmartUpsell] Could not load recommendation:', err);
+        console.warn('[SmartUpsell] API Error:', err);
       });
   })();
 </script>
@@ -158,26 +375,26 @@
 
 {% schema %}
 {
-  "name": "SmartUpsell Widget",
+  "name": "SmartUpsell Bundle",
   "target": "section",
   "settings": [
     {
       "type": "checkbox",
       "id": "show_widget",
-      "label": "Show upsell widget",
+      "label": "Show widget",
       "default": true
     },
     {
       "type": "text",
       "id": "label_text",
-      "label": "Widget label",
-      "default": "Frequently bought together"
+      "label": "Heading text",
+      "default": "Frequently Bought Together"
     },
     {
       "type": "text",
       "id": "button_text",
       "label": "Button text",
-      "default": "Add to cart"
+      "default": "Buy this bundle now"
     }
   ]
 }

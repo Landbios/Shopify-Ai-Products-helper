@@ -57,6 +57,7 @@ export async function getActiveRecommendation(shop: string, triggerProductId: st
     },
     select: {
       id: true,
+      triggerProductTitle: true,
       recommendedProductId: true,
       recommendedProductTitle: true,
       recommendedProductImage: true,

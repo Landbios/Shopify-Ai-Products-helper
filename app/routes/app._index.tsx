@@ -53,9 +53,14 @@ export default function Dashboard() {
                 You don&apos;t have any upsell rules yet. Create your first rule to
                 start boosting your Average Order Value.
               </s-paragraph>
-              <s-button href="/app/rules/new" variant="primary">
-                Create your first rule
-              </s-button>
+              <s-stack direction="inline" gap="base">
+                <s-button href="/app/rules/new" variant="primary">
+                  Create your first rule
+                </s-button>
+                <s-button href="/app/rules/auto">
+                  Auto-generate with AI
+                </s-button>
+              </s-stack>
             </s-stack>
           </s-section>
         )}
@@ -67,6 +72,9 @@ export default function Dashboard() {
               <s-button href="/app/rules">View all rules</s-button>
               <s-button href="/app/rules/new" variant="primary">
                 Add new rule
+              </s-button>
+              <s-button href="/app/rules/auto">
+                Auto-generate with AI
               </s-button>
             </s-stack>
           </s-section>

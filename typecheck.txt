@@ -1,0 +1,16 @@
+﻿
+> typecheck
+> react-router typegen && tsc --noEmit
+
+app/shopify.server.ts(17,3): error TS2322: Type 'PrismaSessionStorage<PrismaClient<PrismaClientOptions, never, DefaultArgs>>' is not assignable to type 'SessionStorage'.
+  Types of property 'storeSession' are incompatible.
+    Type '(session: import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-api/dist/ts/lib/session/session").Session) => Promise<...>' is not assignable to type '(session: import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-app-react-router/node_modules/@shopify/shopify-api/dist/ts/lib/session/session").Session) => Promise<...>'.
+      Types of parameters 'session' and 'session' are incompatible.
+        Type 'import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-app-react-router/node_modules/@shopify/shopify-api/dist/ts/lib/session/session").Session' is not assignable to type 'import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-api/dist/ts/lib/session/session").Session'.
+          Types of property 'isActive' are incompatible.
+            Type '(scopes: string | string[] | import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-app-react-router/node_modules/@shopify/shopify-api/dist/ts/lib/auth/scopes/index").AuthScopes | undefined, withinMillisecondsOfExpiry?: number | undefined) => ...' is not assignable to type '(scopes: string | string[] | import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-api/dist/ts/lib/auth/scopes/index").AuthScopes | undefined, withinMillisecondsOfExpiry?: number | undefined) => boolean'.
+              Types of parameters 'scopes' and 'scopes' are incompatible.
+                Type 'string | string[] | import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-api/dist/ts/lib/auth/scopes/index").AuthScopes | undefined' is not assignable to type 'string | string[] | import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-app-react-router/node_modules/@shopify/shopify-api/dist/ts/lib/auth/scopes/index").AuthScopes | undefined'.
+                  Type 'AuthScopes' is not assignable to type 'string | string[] | AuthScopes | undefined'.
+                    Type 'import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-api/dist/ts/lib/auth/scopes/index").AuthScopes' is not assignable to type 'import("C:/Users/opbvn/Desktop/Wira/Programacion/shopify project/shopify-Ai-products-recomendation/node_modules/@shopify/shopify-app-react-router/node_modules/@shopify/shopify-api/dist/ts/lib/auth/scopes/index").AuthScopes'.
+                      Types have separate declarations of a private property 'compressedScopes'.
