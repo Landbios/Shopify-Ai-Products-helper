@@ -1,0 +1,6 @@
+api_version = "2025-04"
+
+[[extensions]]
+type = "theme"
+name = "SmartUpsell Widget"
+handle = "smart-upsell-widget"

@@ -100,7 +100,7 @@ export default function NewRule() {
 
   return (
     <s-page heading="Create Upsell Rule">
-      <s-link slot="breadcrumbActions" href="/app/rules">
+      <s-link slot="breadcrumb-actions" href="/app/rules">
         Upsell Rules
       </s-link>
 

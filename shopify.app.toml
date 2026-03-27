@@ -5,6 +5,12 @@ name = "smart-upsell-engine"
 application_url = "https://example.com"
 embedded = true
 
+[app_proxy]
+url = "https://example.com"
+subpath = "smartupsell"
+prefix = "apps"
+
+
 [build]
 automatically_update_urls_on_dev = true
 include_config_on_deploy = true

@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   return (
     <s-page heading="SmartUpsell Engine">
-      <s-button slot="primaryAction" href="/app/rules/new" variant="primary">
+      <s-button slot="primary-action" href="/app/rules/new" variant="primary">
         Create Upsell Rule
       </s-button>
 

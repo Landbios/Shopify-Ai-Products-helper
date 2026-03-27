@@ -141,10 +141,10 @@ export default function EditRule() {
 
   return (
     <s-page heading="Edit Upsell Rule">
-      <s-link slot="breadcrumbActions" href="/app/rules">
+      <s-link slot="breadcrumb-actions" href="/app/rules">
         Upsell Rules
       </s-link>
-      <s-button slot="primaryAction" tone="critical" onClick={handleDelete}>
+      <s-button slot="primary-action" tone="critical" onClick={handleDelete}>
         Delete Rule
       </s-button>
 

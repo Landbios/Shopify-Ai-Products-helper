@@ -1,0 +1,158 @@
+{%- comment -%}
+  SmartUpsell Widget Block
+  Fetches a product recommendation from the SmartUpsell Engine API
+  and renders an upsell card on the product or cart page.
+  Merchants can add/remove this block from the Theme Editor.
+{%- endcomment -%}
+
+{% if settings.show_widget %}
+<div
+  id="smartupsell-widget"
+  data-product-id="{{ product.id }}"
+  data-shop="{{ shop.permanent_domain }}"
+  style="display: none;"
+>
+  <!-- Populated by JavaScript below -->
+</div>
+
+<style>
+  #smartupsell-widget {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid #e1e3e5;
+    border-radius: 8px;
+    background: #f6f6f7;
+    font-family: inherit;
+  }
+
+  #smartupsell-widget .sue-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6d7175;
+    margin-bottom: 0.5rem;
+  }
+
+  #smartupsell-widget .sue-product-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #202223;
+    margin-bottom: 0.75rem;
+  }
+
+  #smartupsell-widget .sue-add-btn {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background-color: #008060;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  #smartupsell-widget .sue-add-btn:hover {
+    background-color: #006e52;
+  }
+
+  #smartupsell-widget .sue-add-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  (function () {
+    var widget = document.getElementById('smartupsell-widget');
+    if (!widget) return;
+
+    var productId = widget.dataset.productId;
+    var shop = widget.dataset.shop;
+
+    if (!productId || !shop) return;
+
+    // Encode the GID format expected by the API
+    var gid = 'gid://shopify/Product/' + productId;
+    var apiUrl = '/apps/smartupsell/api/recommendations?productId=' + encodeURIComponent(gid) + '&shop=' + encodeURIComponent(shop);
+
+    fetch(apiUrl)
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data.recommendation) return;
+
+        var rec = data.recommendation;
+
+        widget.innerHTML =
+          '<p class="sue-label">{{ settings.label_text | default: "Frequently bought together" }}</p>' +
+          '<p class="sue-product-title">' + rec.productTitle + '</p>' +
+          '<button class="sue-add-btn" data-variant-id="' + rec.productId + '">' +
+          '{{ settings.button_text | default: "Add to cart" }}</button>';
+
+        widget.style.display = 'block';
+
+        // Add-to-cart handler
+        widget.querySelector('.sue-add-btn').addEventListener('click', function () {
+          var btn = this;
+          btn.disabled = true;
+          btn.textContent = 'Adding…';
+
+          // Extract numeric ID from GID
+          var numericId = rec.productId.split('/').pop();
+
+          fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: numericId, quantity: 1 })
+          })
+            .then(function () {
+              btn.textContent = '✓ Added!';
+              // Trigger a cart refresh if the theme supports it
+              document.dispatchEvent(new CustomEvent('cart:updated'));
+            })
+            .catch(function () {
+              btn.disabled = false;
+              btn.textContent = '{{ settings.button_text | default: "Add to cart" }}';
+            });
+        });
+      })
+      .catch(function (err) {
+        console.warn('[SmartUpsell] Could not load recommendation:', err);
+      });
+  })();
+</script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "SmartUpsell Widget",
+  "target": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_widget",
+      "label": "Show upsell widget",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "label_text",
+      "label": "Widget label",
+      "default": "Frequently bought together"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Add to cart"
+    }
+  ],
+  "presets": [
+    {
+      "name": "SmartUpsell Widget"
+    }
+  ]
+}
+{% endschema %}
