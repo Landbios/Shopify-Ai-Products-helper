@@ -5,7 +5,7 @@
   Merchants can add/remove this block from the Theme Editor.
 {%- endcomment -%}
 
-{% if settings.show_widget %}
+{% if block.settings.show_widget %}
 <div
   id="smartupsell-widget"
   data-product-id="{{ product.id }}"
@@ -34,11 +34,32 @@
     margin-bottom: 0.5rem;
   }
 
+  .sue-content-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .sue-image {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid #e1e3e5;
+  }
+
+  .sue-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
   #smartupsell-widget .sue-product-title {
     font-size: 1rem;
     font-weight: 600;
     color: #202223;
-    margin-bottom: 0.75rem;
   }
 
   #smartupsell-widget .sue-add-btn {
@@ -52,6 +73,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    align-self: flex-start;
   }
 
   #smartupsell-widget .sue-add-btn:hover {
@@ -85,11 +107,20 @@
 
         var rec = data.recommendation;
 
+        var imgHtml = rec.productImage 
+          ? '<img class="sue-image" src="' + rec.productImage + '" alt="' + rec.productTitle + '">' 
+          : '';
+
         widget.innerHTML =
-          '<p class="sue-label">{{ settings.label_text | default: "Frequently bought together" }}</p>' +
-          '<p class="sue-product-title">' + rec.productTitle + '</p>' +
-          '<button class="sue-add-btn" data-variant-id="' + rec.productId + '">' +
-          '{{ settings.button_text | default: "Add to cart" }}</button>';
+          '<p class="sue-label">{{ block.settings.label_text | default: "Frequently bought together" }}</p>' +
+          '<div class="sue-content-row">' +
+            imgHtml +
+            '<div class="sue-details">' +
+              '<p class="sue-product-title">' + rec.productTitle + '</p>' +
+              '<button class="sue-add-btn" data-variant-id="' + rec.productId + '">' +
+              '{{ block.settings.button_text | default: "Add to cart" }}</button>' +
+            '</div>' +
+          '</div>';
 
         widget.style.display = 'block';
 
@@ -114,7 +145,7 @@
             })
             .catch(function () {
               btn.disabled = false;
-              btn.textContent = '{{ settings.button_text | default: "Add to cart" }}';
+              btn.textContent = '{{ block.settings.button_text | default: "Add to cart" }}';
             });
         });
       })
@@ -147,11 +178,6 @@
       "id": "button_text",
       "label": "Button text",
       "default": "Add to cart"
-    }
-  ],
-  "presets": [
-    {
-      "name": "SmartUpsell Widget"
     }
   ]
 }
