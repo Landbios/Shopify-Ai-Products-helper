@@ -326,12 +326,12 @@
           var payload = { items: [] };
 
           if (finalTriggerVariantId) {
-            payload.items.push({ id: finalTriggerVariantId, quantity: 1 });
+            payload.items.push({ id: parseInt(finalTriggerVariantId, 10), quantity: 1 });
           }
 
           var recCheck = document.getElementById('sue-rec-check');
           if (recCheck && recCheck.checked && recVariantId) {
-            payload.items.push({ id: recVariantId, quantity: 1 });
+            payload.items.push({ id: parseInt(recVariantId, 10), quantity: 1 });
           }
 
           if (payload.items.length === 0) return;
@@ -339,29 +339,34 @@
           btn.disabled = true;
           btn.textContent = 'Adding...';
 
-          fetch('/cart/add.js', {
+          var cartAddUrl = (window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart/add.js' : '/cart/add.js';
+
+          fetch(cartAddUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           })
-          .then(function () {
-            btn.textContent = '✓ Added!';
-            
-            setTimeout(function() {
-              btn.textContent = '{{ block.settings.button_text | default: "Buy this bundle now" }}';
-              btn.disabled = false;
-            }, 2000);
-
-            // Emit typical Shopify theme cart update events
-            document.dispatchEvent(new CustomEvent('cart:updated'));
-            document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
+          .then(function (res) {
+            if (!res.ok) {
+              return res.json().then(function(errBody) {
+                throw new Error(errBody.description || errBody.message || "Failed to add");
+              });
+            }
+            return res.json();
           })
-          .catch(function () {
-            btn.textContent = 'Error';
+          .then(function () {
+            btn.textContent = '✓ Added! Redirecting...';
+            
+            var cartUrl = (window.Shopify && window.Shopify.routes) ? window.Shopify.routes.root + 'cart' : '/cart';
+            window.location.href = cartUrl;
+          })
+          .catch(function (err) {
+            console.error('[SmartUpsell] Cart error:', err);
+            btn.textContent = 'Error: ' + err.message;
             setTimeout(function() {
               btn.textContent = '{{ block.settings.button_text | default: "Buy this bundle now" }}';
               btn.disabled = false;
-            }, 2000);
+            }, 3000);
           });
         });
 
