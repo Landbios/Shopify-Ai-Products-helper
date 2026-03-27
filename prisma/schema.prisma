@@ -41,6 +41,7 @@ model UpsellRule {
   triggerProductTitle     String
   recommendedProductId    String
   recommendedProductTitle String
+  recommendedProductImage String?
   status                  String   @default("active")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
