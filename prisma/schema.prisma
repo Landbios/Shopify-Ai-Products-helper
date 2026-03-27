@@ -32,3 +32,19 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model UpsellRule {
+  id                      String   @id @default(cuid())
+  shop                    String
+  title                   String
+  triggerProductId        String
+  triggerProductTitle     String
+  recommendedProductId    String
+  recommendedProductTitle String
+  status                  String   @default("active")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([shop])
+  @@index([shop, triggerProductId])
+}
