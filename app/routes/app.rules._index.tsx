@@ -36,9 +36,10 @@ export default function RulesIndex() {
 
   return (
     <s-page heading="Upsell Rules">
-      <s-button slot="primary-action" href="/app/rules/new" variant="primary">
-        Create Rule
-      </s-button>
+      <s-stack slot="primary-action" direction="inline" gap="small">
+        <s-button href="/app/rules/auto">✨ Auto-Generate with AI</s-button>
+        <s-button href="/app/rules/new" variant="primary">Create Rule</s-button>
+      </s-stack>
 
       {rules.length === 0 ? (
         <s-section>
