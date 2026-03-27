@@ -5,15 +5,12 @@ import type {
 } from "react-router";
 import { useLoaderData, useSubmit } from "react-router";
 import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
+import { getRulesByShop, deleteRule } from "../models/rule.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
-  const rules = await prisma.upsellRule.findMany({
-    where: { shop: session.shop },
-    orderBy: { createdAt: "desc" },
-  });
+  const rules = await getRulesByShop(session.shop);
   return { rules };
 };
 
@@ -22,9 +19,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const id = formData.get("id") as string;
 
-  await prisma.upsellRule.deleteMany({
-    where: { id, shop: session.shop },
-  });
+  await deleteRule(id, session.shop);
 
   return { ok: true };
 };
@@ -40,14 +35,10 @@ export default function RulesIndex() {
   };
 
   return (
-    <s-page
-      heading="Upsell Rules"
-      primaryAction={
-        <s-button href="/app/rules/new" variant="primary">
-          Create Rule
-        </s-button>
-      }
-    >
+    <s-page heading="Upsell Rules">
+      <s-button slot="primary-action" href="/app/rules/new" variant="primary">
+        Create Rule
+      </s-button>
 
       {rules.length === 0 ? (
         <s-section>

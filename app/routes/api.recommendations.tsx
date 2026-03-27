@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
-import prisma from "../db.server";
+import { getActiveRecommendation } from "../models/rule.server";
 
 /**
  * Public endpoint – no Shopify session auth required.
@@ -27,18 +27,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     );
   }
 
-  const rule = await prisma.upsellRule.findFirst({
-    where: {
-      shop,
-      triggerProductId: productId,
-      status: "active",
-    },
-    select: {
-      id: true,
-      recommendedProductId: true,
-      recommendedProductTitle: true,
-    },
-  });
+  const rule = await getActiveRecommendation(shop, productId);
 
   if (!rule) {
     return new Response(JSON.stringify({ recommendation: null }), {
@@ -53,6 +42,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         id: rule.id,
         productId: rule.recommendedProductId,
         productTitle: rule.recommendedProductTitle,
+        productImage: rule.recommendedProductImage,
       },
     }),
     { status: 200, headers },

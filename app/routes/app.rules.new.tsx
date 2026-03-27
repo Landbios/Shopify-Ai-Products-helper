@@ -5,7 +5,7 @@ import type {
 } from "react-router";
 import { useActionData, Form, useNavigation, redirect } from "react-router";
 import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
+import { createRule } from "../models/rule.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { useEffect, useState, useCallback } from "react";
 import { useAppBridge } from "@shopify/app-bridge-react";
@@ -26,6 +26,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const recommendedProductTitle = formData.get(
     "recommendedProductTitle",
   ) as string;
+  const recommendedProductImage = formData.get(
+    "recommendedProductImage",
+  ) as string;
   const status = formData.get("status") as string;
 
   const errors: Record<string, string> = {};
@@ -40,16 +43,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (Object.keys(errors).length > 0) return { errors };
 
-  await prisma.upsellRule.create({
-    data: {
-      shop: session.shop,
-      title,
-      triggerProductId,
-      triggerProductTitle,
-      recommendedProductId,
-      recommendedProductTitle,
-      status: status === "inactive" ? "inactive" : "active",
-    },
+  await createRule({
+    shop: session.shop,
+    title,
+    triggerProductId,
+    triggerProductTitle,
+    recommendedProductId,
+    recommendedProductTitle,
+    recommendedProductImage,
+    status,
   });
 
   return redirect("/app/rules");
@@ -69,6 +71,7 @@ export default function NewRule() {
   const [triggerProductTitle, setTriggerProductTitle] = useState("");
   const [recommendedProductId, setRecommendedProductId] = useState("");
   const [recommendedProductTitle, setRecommendedProductTitle] = useState("");
+  const [recommendedProductImage, setRecommendedProductImage] = useState("");
 
   const selectTrigger = useCallback(async () => {
     const result = await shopify.resourcePicker({
@@ -89,6 +92,7 @@ export default function NewRule() {
     if (result && result.length > 0) {
       setRecommendedProductId(result[0].id);
       setRecommendedProductTitle(result[0].title);
+      setRecommendedProductImage(result[0].images?.[0]?.originalSrc || "");
     }
   }, [shopify]);
 
@@ -121,6 +125,11 @@ export default function NewRule() {
           type="hidden"
           name="recommendedProductTitle"
           value={recommendedProductTitle}
+        />
+        <input
+          type="hidden"
+          name="recommendedProductImage"
+          value={recommendedProductImage}
         />
 
         <s-stack direction="block" gap="base">
